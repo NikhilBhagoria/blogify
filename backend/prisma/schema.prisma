@@ -18,10 +18,10 @@ model User {
   email     String   @unique
   name      String?
   password  String
-  posts     Post[]
+  blogs     Blog[]
 }
 
-model Post {
+model Blog {
   id        String   @id @default(uuid())
   title     String
   content   String
