@@ -1,3 +1,4 @@
+import { createBlogInput, updateBlogInput } from '@nikhilbhagoria/medium-common';
 import { PrismaClient } from '@prisma/client/edge'
 import { withAccelerate } from "@prisma/extension-accelerate";
 import { Hono } from "hono";
@@ -35,7 +36,13 @@ export const blogRouter = new Hono<{
         datasourceUrl: c.env.DATABASE_URL,
       }).$extends(withAccelerate())
       try{
-        const {title,content} = await c.req.json()
+        const body = await c.req.json();
+        const {success} = createBlogInput.safeParse(body);
+        if(!success){
+          return c.json({
+            message:"Input not correct"
+          },411)
+        }
         const user = await prisma.user.findUnique({
             where:{id:c.get("userId")}
         })
@@ -43,7 +50,11 @@ export const blogRouter = new Hono<{
             return c.json({message:"User not found"},404)
         }
         const blog = await prisma.blog.create({
-            data:{title,content,authorId:user.id}
+            data:{
+              title:body.title,
+              content:body.content,
+              authorId:user.id
+            }
         })
         return c.json(blog)
       }catch(error){
@@ -58,9 +69,20 @@ export const blogRouter = new Hono<{
       }).$extends(withAccelerate())
       try{
         const {id,title,content} = await c.req.json()
+        const {success} = updateBlogInput.safeParse({id,title,content});
+        if(!success){
+          return c.json({
+            message:"Input not correct"
+          },411)
+        }
         const blog = await prisma.blog.update({
-            where:{id},
-            data:{title,content}
+            where:{
+              id
+            },
+            data:{
+              title,
+              content
+            }
         })
         return c.json(blog)
       }catch(error){
