@@ -3,8 +3,6 @@ import { verify } from 'hono/jwt'
 import { userRouter } from './routes/user'
 import { blogRouter } from './routes/blog'
 import { cors } from 'hono/cors'
-import { PrismaClient } from '@prisma/client'
-import { withAccelerate } from '@prisma/extension-accelerate'
 
 const app = new Hono<{
   Bindings: {
