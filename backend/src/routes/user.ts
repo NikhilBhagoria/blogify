@@ -68,10 +68,10 @@ userRouter.post("/signup", async (c) => {
     if(!success){
       return c.json({message:"Input not correct"},411);
     }
-    const { email, password } = body;
+    const { username, password } = body;
     const user = await prisma.user.findUnique({
       where: {
-        email,
+        email:username,
       }
     })
     if (!user) {
@@ -86,7 +86,7 @@ userRouter.post("/signup", async (c) => {
     }
     const token = await sign({
       id: user.id,
-      email: user.email,
+      email: user.username,
     }, c.env.JWT_SECRET)
     return c.json({
       token,

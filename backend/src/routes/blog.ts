@@ -58,7 +58,7 @@ export const blogRouter = new Hono<{
         })
         return c.json(blog)
       }catch(error){
-        console.log("err",error)
+        // console.log("err",error)
         return c.json({message:"Internal Server Error"},500)
       }
   })
@@ -95,7 +95,18 @@ export const blogRouter = new Hono<{
       datasourceUrl: c.env.DATABASE_URL,
     }).$extends(withAccelerate())
     try {
-      const blogs = await prisma.blog.findMany();
+      const blogs = await prisma.blog.findMany({
+        select:{
+          content:true,
+          title:true,
+          id:true,
+          author:{
+            select:{
+              name:true
+            }
+          }
+        }
+      });
       if(!blogs)
         return c.json({message:"Internal Server Error"},500);
       

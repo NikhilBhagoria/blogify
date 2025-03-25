@@ -10,7 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@nikhilbhagoria/medium-common": "^1.0.2",
+    "@nikhilbhagoria/medium-common": "^1.0.3",
     "@tailwindcss/vite": "^4.0.15",
     "autoprefixer": "^10.4.21",
     "axios": "^1.8.4",

@@ -1,8 +1,27 @@
+import { Appbar } from "../components/Appbar";
 import { BlogCard } from "../components/BlogCard"
+import { AllBlogSkeleton } from "../components/BlogSkeleton";
+import { useBlogs } from "../hooks"
 
 export const Blogs = () => {
+    const {blogs,loading} = useBlogs();
+
+    if(loading){
+        return (
+            <div>
+              <Appbar />{" "}
+              <div className="flex justify-center items-center m-5 flex-col lg:ml-[100px] gap-5">
+                <AllBlogSkeleton />
+                <AllBlogSkeleton />
+                <AllBlogSkeleton />
+                <AllBlogSkeleton />
+              </div>
+            </div>
+          );
+    }
     return (
         <div>
+            <Appbar/>
             <div className="flex justify-center">
                 <div>
                     {/* {blogs.map(blog => <BlogCard
