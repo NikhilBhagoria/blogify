@@ -31,13 +31,13 @@ export const Blogs = () => {
                     content={blog.content}
                     publishedDate={"2nd Feb 2024"}
                 />)}
-                    <BlogCard
+                    {/* <BlogCard
                         id={1}
                         authorName="nk"
                         title="title of the blog title of the blog title of the blog title of the blog title of the blog title of the blog title of the blog title of the blog title of the blog title of the blog title of the blog title of the blog"
                         content="contect of the blog contect of the blogcontect of the blogcontect of the blogcontect of the blogcontect of the blogcontect of the blog"
                         publishedDate="2nd feb 2025"
-                    />
+                    /> */}
                 </div>
             </div>
         </div>
