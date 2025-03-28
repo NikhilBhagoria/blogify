@@ -3,8 +3,16 @@ import { BlogCard } from "../components/BlogCard"
 import { AllBlogSkeleton } from "../components/BlogSkeleton";
 import { useBlogs } from "../hooks"
 
+interface Blog{
+        "content":string,
+        "title":string,
+        "id":string,
+        "authorName":string,
+        "publishedDate":string
+}
+
 export const Blogs = () => {
-    const {blogs,loading} = useBlogs();
+    const {blogs,loading} = useBlogs<Blog>();
 
     if(loading){
         return (
@@ -24,7 +32,7 @@ export const Blogs = () => {
             <Appbar/>
             <div className="flex justify-center">
                 <div>
-                    {blogs.map(blog => <BlogCard
+                    {blogs?.map(blog => <BlogCard
                     id={blog.id}
                     authorName={blog.author.name || "Anonymous"}
                     title={blog.title}
