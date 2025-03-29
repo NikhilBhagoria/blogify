@@ -13,6 +13,7 @@ interface Blog{
 
 export const Blogs = () => {
     const {blogs,loading} = useBlogs<Blog>();
+    console.log("blogss",blogs);
 
     if(loading){
         return (

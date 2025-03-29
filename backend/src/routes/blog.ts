@@ -96,6 +96,7 @@ blogRouter.put("/", async (c) => {
 })
 
 blogRouter.get('/bulk', async (c) => {
+  console.log("enter bulk")
   const prisma = new PrismaClient({
     datasourceUrl: c.env.DATABASE_URL,
   }).$extends(withAccelerate())
@@ -114,16 +115,17 @@ blogRouter.get('/bulk', async (c) => {
     });
     if (!blogs)
       return c.json({ message: "Internal Server Error" }, 500);
-
+    console.log("bbbb",blogs);
     return c.json({
-      blogs
-    })
+      blogs:blogs
+    },200)
   } catch (error) {
     return c.json({ message: "Internal Server Error" }, 500);
   }
 })
 
 blogRouter.get('/:id', async (c) => {
+  console.log("enter id")
   const prisma = new PrismaClient({
     datasourceUrl: c.env.DATABASE_URL,
   }).$extends(withAccelerate())
@@ -132,6 +134,9 @@ blogRouter.get('/:id', async (c) => {
     const blog = await prisma.blog.findUnique({
       where: {
         id
+      },
+      select:{
+        title:true,
       }
       // it can response send only published data
       // select:{
