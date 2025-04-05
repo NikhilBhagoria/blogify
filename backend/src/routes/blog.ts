@@ -136,7 +136,14 @@ blogRouter.get('/:id', async (c) => {
         id
       },
       select:{
+        id:true,
         title:true,
+        content:true,
+        author:{
+          select:{
+            name:true
+          }
+        }
       }
       // it can response send only published data
       // select:{
