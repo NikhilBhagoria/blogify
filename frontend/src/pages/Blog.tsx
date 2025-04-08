@@ -21,7 +21,7 @@ const Blog = () => {
     );
   }
   return (
-    <div><FullBlog/></div>
+    <div><FullBlog blog={blog}/></div>
   )
 }
 
