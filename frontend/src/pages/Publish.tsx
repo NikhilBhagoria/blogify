@@ -2,6 +2,27 @@ import { ChangeEvent, useState } from 'react'
 
 const Publish = () => {
   const [description, setDescription] = useState("");
+
+  const publishPost = useCallback(async () => {
+    if (title == "" || description == "") {
+      return toast.error("Please fill all inputs");
+    }
+    const response = await axios.post(
+      `${BACKEND_URL}/api/v1/blog`,
+      {
+        title,
+        content: description,
+      },
+      {
+        headers: {
+          Authorization: localStorage.getItem("authorization"),
+        },
+      }
+    );
+    refresh();
+    navigate(`/blog/${response.data.id}`);
+  }, [title, description]);
+  
   return (
     <div>
       <TextEditor
