@@ -1,7 +1,13 @@
-import { ChangeEvent, useState } from 'react'
+import { ChangeEvent, useState, useCallback } from 'react'
+import axios from 'axios'
+import { toast } from 'react-toastify'
+import { useNavigate } from 'react-router-dom'
+import { BACKEND_URL } from '../config'
 
 const Publish = () => {
   const [description, setDescription] = useState("");
+  const [title, setTitle] = useState("");
+  const navigate = useNavigate();
 
   const publishPost = useCallback(async () => {
     if (title == "" || description == "") {
@@ -15,7 +21,7 @@ const Publish = () => {
       },
       {
         headers: {
-          Authorization: localStorage.getItem("authorization"),
+          Authorization: localStorage.getItem("token"),
         },
       }
     );
