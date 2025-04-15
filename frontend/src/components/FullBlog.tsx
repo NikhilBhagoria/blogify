@@ -1,7 +1,7 @@
 import { memo } from "react";
 import { Blog } from "../pages/Blogs";
 import { Appbar } from "./Appbar";
-import Avatar from "./Avatar";
+import { Avatar } from "./Avatar";
 
 const FullBlog = ({ blog }: { blog: Blog }) => {
   const paragraphs: string[] = blog.content.split(".");
@@ -27,7 +27,7 @@ const FullBlog = ({ blog }: { blog: Blog }) => {
             <div className="text-slate-500 text-lg">Author</div>
             <div className="flex w-full">
               <div className="pr-2 flex flex-col justify-center">
-                <Avatar size={"12"} name={blog.author.name || "Anonymous"} />
+                <Avatar size={"big"} name={blog.author.name || "Anonymous"} />
               </div>
               <div>
                 <div className="text-xl font-bold">

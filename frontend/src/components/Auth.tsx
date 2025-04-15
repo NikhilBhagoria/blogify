@@ -6,6 +6,8 @@ import { BACKEND_URL } from "../config";
 
 export const Auth = ({ type }: { type: "signup" | "signin" }) => {
     const navigate = useNavigate();
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState("");
     const [postInputs, setPostInputs] = useState<SignupInput>({
         name: "",
         username: "",
@@ -14,25 +16,29 @@ export const Auth = ({ type }: { type: "signup" | "signin" }) => {
 
     async function sendRequest() {
         try {
-            const response = await axios.post(`${BACKEND_URL}/api/v1/user/${type === "signup" ? "signup" : "signin"}`, {name:postInputs.name,username:postInputs.username,password:postInputs.password});
+            setIsLoading(true);
+            const response = await axios.post(`${BACKEND_URL}/api/v1/user/${type === "signup" ? "signup" : "signin"}`, { name: postInputs.name, username: postInputs.username, password: postInputs.password });
             const token = response.data.token;
             localStorage.setItem("token", token);
             navigate("/blogs");
-        } catch(e) {
-            alert("Error while signing up")
+        } catch (e: any) {
+            console.log("ee",e);
+            setError(e.response.data.message)
             // alert the user here that the request failed
+        } finally {
+            setIsLoading(false);
         }
     }
-    
+
     return <div className="h-screen flex justify-center flex-col">
         <div className="flex justify-center">
             <div>
                 <div className="px-10">
                     <div className="text-3xl font-extrabold">
-                    {type === "signin" ? "Login Account" : "Create an Account"}
+                        {type === "signin" ? "Login Account" : "Create an Account"}
                     </div>
                     <div className="text-slate-500">
-                        {type === "signin" ? "Don't have an account?" : "Already have an account?" }
+                        {type === "signin" ? "Don't have an account?" : "Already have an account?"}
                         <Link className="pl-2 underline" to={type === "signin" ? "/signup" : "/signin"}>
                             {type === "signin" ? "Sign up" : "Sign in"}
                         </Link>
@@ -57,7 +63,8 @@ export const Auth = ({ type }: { type: "signup" | "signin" }) => {
                             password: e.target.value
                         })
                     }} />
-                    <button onClick={sendRequest} type="button" className="mt-8 w-full text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-700 dark:border-gray-700">{type === "signup" ? "Sign up" : "Sign in"}</button>
+                    {error && <div className="text-red-500">{error}</div>}
+                    <button onClick={sendRequest} disabled={isLoading} type="button" className={`mt-8 w-full text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-700 dark:border-gray-700 ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}>{isLoading ? "Loading..." : type === "signup" ? "Sign up" : "Sign in"}</button>
                 </div>
             </div>
         </div>

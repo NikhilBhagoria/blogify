@@ -1,7 +1,7 @@
 import { ChangeEvent, useState, useCallback } from 'react'
 import axios from 'axios'
 import { toast } from 'react-toastify'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { BACKEND_URL } from '../config'
 
 const Publish = () => {

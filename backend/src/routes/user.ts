@@ -76,12 +76,12 @@ userRouter.post("/signup", async (c) => {
     })
     if (!user) {
       return c.json({
-        message: "User not found",
+        message: "The email address you entered isn't connected to an account.",
       }, 400)
     }
     if (user.password !== password) {
       return c.json({
-        message: "Invalid password",
+        message: "The password that you've entered is incorrect.",
       }, 400)
     }
     const token = await sign({
