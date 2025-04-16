@@ -90,6 +90,9 @@ userRouter.post("/signup", async (c) => {
     }, c.env.JWT_SECRET)
     return c.json({
       token,
+      user: {
+        name: user.name,
+      },
     })
     } catch (error) {
       return c.json({
