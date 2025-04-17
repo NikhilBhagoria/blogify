@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client/edge'
 import { withAccelerate } from "@prisma/extension-accelerate";
 import { Hono } from "hono";
-import { sign } from "hono/jwt";
+import { sign, verify } from "hono/jwt";
 import { signinInput, signupInput, SignupInput } from '@nikhilbhagoria/medium-common';
 
 export const userRouter = new Hono<{
@@ -50,6 +50,11 @@ userRouter.post("/signup", async (c) => {
   
     return c.json({
       token,
+      user: {
+        name: newUser.name,
+        email: newUser.email,
+        bio: newUser.bio,
+      },
     })
     } catch (error) {
       return c.json({
@@ -86,12 +91,14 @@ userRouter.post("/signup", async (c) => {
     }
     const token = await sign({
       id: user.id,
-      email: user.username,
+      email: user.email,
     }, c.env.JWT_SECRET)
     return c.json({
       token,
       user: {
         name: user.name,
+        email: user.email,
+        bio: user.bio,
       },
     })
     } catch (error) {
@@ -100,3 +107,76 @@ userRouter.post("/signup", async (c) => {
       }, 500)
     }
   })
+
+userRouter.put("/profile", async (c) => {
+  const prisma = new PrismaClient({
+    datasourceUrl: c.env.DATABASE_URL,
+  }).$extends(withAccelerate())
+  try{
+    const token = c.req.header("Authorization")?.split(" ")[1];
+    if(!token){
+      return c.json({
+        message: "Unauthorized",
+      }, 401)
+    }
+    const decoded = await verify(token, c.env.JWT_SECRET)
+    if(!decoded){
+      return c.json({
+        message: "Unauthorized",
+      }, 401)
+    }
+    const {bio} = await c.req.json();
+    const user = await prisma.user.update({
+      where: {
+        id: decoded.id,
+      },
+      data: {
+        bio,
+      },
+    })
+    return c.json({
+      message: "Profile updated successfully",
+    })
+  } catch (error) {
+    return c.json({
+      message: "Internal server error",
+    }, 500)
+  }
+})
+
+userRouter.get("/me", async (c) => {
+  const prisma = new PrismaClient({
+    datasourceUrl: c.env.DATABASE_URL,
+  }).$extends(withAccelerate())
+  try{
+  const token = c.req.header("Authorization")?.split(" ")[1];
+  if(!token){
+    return c.json({
+      message: "Unauthorized",
+    }, 401)
+  }
+  const decoded = await verify(token, c.env.JWT_SECRET)
+  if(!decoded){
+    return c.json({
+      message: "Unauthorized",
+    }, 401)
+  }
+  const user = await prisma.user.findUnique({
+    where: {
+      id: decoded.id,
+    },
+    select: {
+      name: true,
+      email: true,
+      bio: true,
+    },
+  })
+  return c.json({
+    user,
+  })
+} catch (error) {
+  return c.json({
+    message: "Internal server error",
+  }, 500)
+}
+})

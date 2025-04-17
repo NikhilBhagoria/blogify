@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { Blog } from "../pages/Blogs";
+import { Blog } from "../hooks";
 import { Appbar } from "./Appbar";
 import { Avatar } from "./Avatar";
 
@@ -14,7 +14,19 @@ const FullBlog = ({ blog }: { blog: Blog }) => {
             <div className="md:text-5xl text-3xl w-full font-extrabold">
               {blog.title}
             </div>
-            <div className="text-slate-500 pt-2">Posted on 2nd dec 2023 </div>
+            {/* <div className="text-slate-500 pt-2">Posted on 2nd dec 2023 </div> */}
+            <div className="mt-8">
+            <div className="flex items-center text-gray-700 border-b-2 pb-5 border-gray-100">
+              <div className="rounded-full bg-gray-400 text-white w-7 h-7 flex justify-center items-center text-sm mr-2">
+                {blog?.author.name?.[0] || "A"}
+              </div>
+              <div className="">{blog?.author.name || "Anonymous"}</div>
+              <div className="text-sm pl-2">
+                &#x2022; {Math.ceil((blog?.content?.length || 0) / 700)} min
+                read
+              </div>
+            </div>
+          </div>
 
             {paragraphs.map((content: string, index: number) => (
               <div key={index} className="pt-4 w-full">
@@ -34,8 +46,7 @@ const FullBlog = ({ blog }: { blog: Blog }) => {
                   {blog.author.name || "Anonymous"}
                 </div>
                 <div className="pt-2 text-slate-500">
-                  Random catch pharse about the author's ability to grab the
-                  user's attention
+                  {blog.author.bio}
                 </div>
               </div>
             </div>

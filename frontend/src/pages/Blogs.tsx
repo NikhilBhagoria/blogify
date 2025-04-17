@@ -1,20 +1,10 @@
 import { Appbar } from "../components/Appbar";
 import { BlogCard } from "../components/BlogCard"
 import { AllBlogSkeleton } from "../components/BlogSkeleton";
-import { useBlogs } from "../hooks"
-
-interface Blog{
-        "content":string,
-        "title":string,
-        "id":string,
-        "authorName":string,
-        "publishedDate":string
-}
+import { Blog, useBlogs } from "../hooks"
 
 export const Blogs = () => {
-    const {blogs,loading} = useBlogs<Blog>();
-    console.log("blogss",blogs);
-
+    const {blogs,loading} = useBlogs();
     if(loading){
         return (
             <div>
@@ -31,23 +21,15 @@ export const Blogs = () => {
     return (
         <div>
             <Appbar/>
-            <div className="flex justify-center">
-                <div>
-                    {blogs?.map(blog => <BlogCard
+            <div className="flex flex-col items-center h-screen mt-10">
+                    {blogs?.map((blog:Blog) => <BlogCard
+                    key={blog.id}
                     id={blog.id}
                     authorName={blog.author.name || "Anonymous"}
                     title={blog.title}
                     content={blog.content}
-                    publishedDate={"2nd Feb 2024"}
+                    publishedDate={blog.createdAt}
                 />)}
-                    {/* <BlogCard
-                        id={1}
-                        authorName="nk"
-                        title="title of the blog title of the blog title of the blog title of the blog title of the blog title of the blog title of the blog title of the blog title of the blog title of the blog title of the blog title of the blog"
-                        content="contect of the blog contect of the blogcontect of the blogcontect of the blogcontect of the blogcontect of the blogcontect of the blog"
-                        publishedDate="2nd feb 2025"
-                    /> */}
-                </div>
             </div>
         </div>
     )

@@ -2,13 +2,15 @@ import axios from "axios";
 import { useEffect, useState } from "react"
 import { BACKEND_URL } from "../config";
 
-interface Blog{
+export interface Blog{
     "content":string,
     "title":string,
     "id":string,
     "author":{
-        "name":string
-    }
+        "name":string,
+        "bio":string
+    },
+    "createdAt":string
 }
 
 export const useBlog = ({id}: {id:string}) =>{
@@ -48,7 +50,6 @@ export const useBlogs = () =>{
             }
         })
         .then(response =>{
-            console.log("resppp",response.data);
             setBlogs(response.data.blogs);
             setLoading(false);
         })
@@ -59,4 +60,28 @@ export const useBlogs = () =>{
 
     },[])
     return { loading,blogs}
+}
+
+export interface User{
+    "name":string,
+    "email":string,
+    "bio":string
+}
+export const useUser = () =>{
+    const [user,setUser] = useState<User>();
+    useEffect(()=>{
+        const token = localStorage.getItem("token");
+        axios.get(`${BACKEND_URL}/api/v1/user/me`,{
+            headers:{
+                "Authorization":`Bearer ${token}`
+            }
+        })
+        .then(response =>{
+            setUser(response.data.user);
+        })
+        .catch(error => {
+            console.error("Error fetching user:", error);
+        });
+    },[])
+    return {user}
 }

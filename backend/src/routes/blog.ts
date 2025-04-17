@@ -96,7 +96,6 @@ blogRouter.put("/", async (c) => {
 })
 
 blogRouter.get('/bulk', async (c) => {
-  console.log("enter bulk")
   const prisma = new PrismaClient({
     datasourceUrl: c.env.DATABASE_URL,
   }).$extends(withAccelerate())
@@ -110,12 +109,12 @@ blogRouter.get('/bulk', async (c) => {
           select: {
             name: true
           }
-        }
+        },
+        createdAt:true
       }
     });
     if (!blogs)
       return c.json({ message: "Internal Server Error" }, 500);
-    console.log("bbbb",blogs);
     return c.json({
       blogs:blogs
     },200)
@@ -125,7 +124,6 @@ blogRouter.get('/bulk', async (c) => {
 })
 
 blogRouter.get('/:id', async (c) => {
-  console.log("enter id")
   const prisma = new PrismaClient({
     datasourceUrl: c.env.DATABASE_URL,
   }).$extends(withAccelerate())
@@ -141,9 +139,11 @@ blogRouter.get('/:id', async (c) => {
         content:true,
         author:{
           select:{
-            name:true
+            name:true,
+            bio:true
           }
-        }
+        },
+        createdAt:true
       }
       // it can response send only published data
       // select:{

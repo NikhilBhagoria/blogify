@@ -15,29 +15,24 @@ export const BlogCard = ({
     content,
     publishedDate
 }: BlogCardProps) => {
-    return <Link to={`/blog/${id}`}>
-        <div className="p-4 border-b border-slate-200 pb-4 w-screen max-w-screen-md cursor-pointer">
-            <div className="flex">
-                <Avatar name={authorName} />
-                <div className="font-extralight pl-2 text-sm flex justify-center flex-col">{authorName}</div>
-                <div className="flex justify-center flex-col pl-2">
-                    <Circle />
-                </div>
-                <div className="pl-2 font-thin text-slate-500 text-sm flex justify-center flex-col">
-                    {publishedDate}
-                </div>
-            </div>
-            <div className="text-xl font-semibold pt-2">
-                {title}
-            </div>
-            <div className="text-md font-thin">
-                {content.slice(0, 100) + "..."}
-            </div>
-            <div className="text-slate-500 text-sm font-thin pt-4">
-                {`${Math.ceil(content.length / 100)} minute(s) read`}
-            </div>
-        </div>
-    </Link>
+    return <Link to={`/blog/${id}`} className="w-1/2 cursor-pointer">
+    <div className="flex items-center mb-2 mt-8">
+        <Avatar name={authorName} />
+      {/* <div className="text-white w-7 h-7 flex justify-center items-center text-sm mr-2">
+      </div> */}
+      <div className="font-semibold ml-2 pr-2">{authorName} </div>
+      <div className="text-gray-700 text-sm">&#x2022; {formatDate(publishedDate)}</div>
+    </div>
+    <div className="font-extrabold text-3xl mb-3">{title}</div>
+    <div className="font-medium font-serif pb-4">
+      {content.length > 190 ? content.slice(0, 190) + "..." : content}
+    </div>
+    <div className="pb-8 border-b-2 border-gray-100">
+      <div className="bg-gray-100 text-xs w-fit font-medium rounded-xl px-2 py-1">
+        {Math.ceil(content.length / 700)} min read
+      </div>
+    </div>
+  </Link>
 }
 
 export function Circle() {
@@ -46,3 +41,25 @@ export function Circle() {
     </div>
 }
 
+const formatDate = (isoString:string) => {
+  if (!isoString) {
+    return ""; 
+  }
+  
+  try {
+    const date = new Date(isoString);
+    
+    // Check if date is valid
+    if (isNaN(date.getTime())) {
+      return "";
+    }
+    
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  } catch (error) {
+    return ""; 
+  }
+}
