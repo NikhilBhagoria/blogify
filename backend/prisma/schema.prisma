@@ -19,6 +19,8 @@ model User {
   name      String?
   password  String
   blogs     Blog[]
+  isDeleted Boolean  @default(false)
+  bio       String?  @default("No bio yet")
 }
 
 model Blog {
@@ -28,4 +30,6 @@ model Blog {
   published Boolean  @default(false)
   authorId  String
   author    User     @relation(fields: [authorId], references: [id])
+  createdAt DateTime @default(now())
+  isDeleted Boolean  @default(false)
 }
