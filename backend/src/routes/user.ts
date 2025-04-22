@@ -71,7 +71,7 @@ userRouter.post("/signup", async (c) => {
     const body = await c.req.json();
     const {success} = signinInput.safeParse(body);
     if(!success){
-      return c.json({message:"Input not correct"},411);
+      return c.json({message:"Enter correct email and password"},411);
     }
     const { username, password } = body;
     const user = await prisma.user.findUnique({
