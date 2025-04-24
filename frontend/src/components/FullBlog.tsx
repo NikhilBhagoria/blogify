@@ -1,6 +1,5 @@
 import { memo, useEffect, useRef, useState } from "react";
 import { Blog } from "../hooks";
-import { Appbar } from "./Appbar";
 import { Avatar } from "./Avatar";
 import { useNavigate } from "react-router";
 import { BACKEND_URL } from "../config";
@@ -75,7 +74,6 @@ const FullBlog = ({ blog }: { blog: Blog }) => {
 
   return (
     <>
-      <Appbar />
       <div className="pt-8 md:pt-12">
         <div className="grid grid-cols-12 px-[12%] w-full max-w-screen-2xl">
           <div className="col-span-12 md:col-span-8">

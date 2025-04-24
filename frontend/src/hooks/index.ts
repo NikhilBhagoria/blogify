@@ -16,10 +16,16 @@ export interface Blog{
 
 export const useBlog = ({id}: {id:string}) =>{
     const [loading,setLoading] = useState(true);
-    const [blog,setBlog] = useState<Blog>();
+    const [blog,setBlog] = useState<Blog| null>(null);
+    const [error,setError] = useState<string | null>(null);
 
     useEffect(()=>{
         const token = localStorage.getItem("token");
+        if(!id){
+            setError("Blog ID is required");
+            setLoading(false);
+            return;
+        }
         axios.get(`${BACKEND_URL}/api/v1/blog/${id}`,{
             headers:{
                 Authorization:`Bearer ${token}`
@@ -28,13 +34,24 @@ export const useBlog = ({id}: {id:string}) =>{
         .then(response =>{
             setBlog(response.data.blog);
             setLoading(false);
+            setError(null);
         })
         .catch(error => {
+            const statusCode = error.response?.status;
+            if(statusCode === 404){
+                setError("Blog not found");
+            }else{
+                setError("An error occurred while fetching the blog");
+            }
             console.error("Error fetching blogs:", error);
             setLoading(false);
-        });
+            setBlog(null);
+        })
+        .finally(()=>{
+            setLoading(false);
+        })
     },[id])
-    return{ loading,blog};
+    return{ loading,blog,error};
 }
 
 
