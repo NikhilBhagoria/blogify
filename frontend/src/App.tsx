@@ -7,7 +7,6 @@ import Publish from "./pages/Publish"
 import ProtectedRoute from "./components/ProtectedRoute"
 import PublicRoute from "./components/PublicRoute"
 import NotFound from "./pages/NotFound"
-import UnderConstruction from "./pages/UnderConstruction"
 import Profile from "./pages/Profile"
 
 function App() {
