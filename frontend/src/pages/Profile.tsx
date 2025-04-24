@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
 import { Appbar } from "../components/Appbar";
 import { useUser } from "../hooks";
-import { BACKEND_URL } from "../config";
-import axios from "axios";
 
 const Profile = () => {
   const {user} = useUser();
@@ -18,7 +16,6 @@ const Profile = () => {
   }, [user]); 
 
 
-  console.log("users",user);
   // console.log("user",user);
   // const [isEditProfile, setIsEditProfile] = useState(false);
   // // const [bio, setBio] = useState(user?.bio || "");
@@ -228,12 +225,12 @@ const Profile = () => {
 
 
 
-const EditProfile = ({ bio, setBio, handleSaveProfile}: {bio: string, setBio: (bio: string) => void, handleSaveProfile: () => void}) => {
-    return <div className="flex flex-col gap-4 justify-center items-center">
-            <h1>Edit Profile</h1>
-            <input type="text" placeholder="Bio" className="w-full p-2 rounded-lg bg-gray-200 focus:outline-none" value={bio} onChange={(e) => setBio(e.target.value)} />
-            <button className="cursor-pointer rounded-lg text-green-400" onClick={handleSaveProfile}>Save</button>
-        </div>
-}
+// const EditProfile = ({ bio, setBio, handleSaveProfile}: {bio: string, setBio: (bio: string) => void, handleSaveProfile: () => void}) => {
+//     return <div className="flex flex-col gap-4 justify-center items-center">
+//             <h1>Edit Profile</h1>
+//             <input type="text" placeholder="Bio" className="w-full p-2 rounded-lg bg-gray-200 focus:outline-none" value={bio} onChange={(e) => setBio(e.target.value)} />
+//             <button className="cursor-pointer rounded-lg text-green-400" onClick={handleSaveProfile}>Save</button>
+//         </div>
+// }
 
 export default Profile
