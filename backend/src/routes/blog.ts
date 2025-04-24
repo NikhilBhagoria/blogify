@@ -24,11 +24,11 @@ blogRouter.use("/*", async (c, next) => {
     if (!token) {
       return c.json({ message: "Unauthorized" }, 401)
     }
-    const decoded = await verify(token, c.env.JWT_SECRET)
+    const decoded = await verify(token, c.env.JWT_SECRET);
     if (!decoded) {
       return c.json({ message: "Unauthorized" }, 401)
     }
-    c.set("userId", decoded.id)
+    c.set("userId", decoded.id as string)
     await next()
   } catch (error) {
     console.log("erro",error);
@@ -49,7 +49,7 @@ blogRouter.post("/", async (c) => {
       }, 411)
     }
     const user = await prisma.user.findUnique({
-      where: { id: c.get("userId") }
+      where: { id: c.get("userId") as string }
     })
     if (!user) {
       return c.json({ message: "User not found" }, 404)
@@ -63,11 +63,11 @@ blogRouter.post("/", async (c) => {
     })
     return c.json(blog)
   } catch (error) {
-    // console.log("err",error)
     return c.json({ message: "Internal Server Error" }, 500)
   }
 })
 
+// update blog
 blogRouter.put("/", async (c) => {
   const prisma = new PrismaClient({
     datasourceUrl: c.env.DATABASE_URL,
@@ -101,17 +101,25 @@ blogRouter.get('/bulk', async (c) => {
   }).$extends(withAccelerate())
   try {
     const blogs = await prisma.blog.findMany({
+      where:{
+        isDeleted: false
+      },
       select: {
         content: true,
         title: true,
         id: true,
         author: {
           select: {
-            name: true
+            id: true,
+            name: true,
+            bio: true
           }
         },
         createdAt:true
-      }
+      },
+      orderBy:{
+        createdAt: "desc"
+      },
     });
     if (!blogs)
       return c.json({ message: "Internal Server Error" }, 500);
@@ -131,7 +139,8 @@ blogRouter.get('/:id', async (c) => {
     const id = c.req.param("id");
     const blog = await prisma.blog.findUnique({
       where: {
-        id
+        id,
+        isDeleted: false
       },
       select:{
         id:true,
@@ -139,6 +148,7 @@ blogRouter.get('/:id', async (c) => {
         content:true,
         author:{
           select:{
+            id:true,
             name:true,
             bio:true
           }
@@ -150,6 +160,10 @@ blogRouter.get('/:id', async (c) => {
       //   published: true,
       // }
     })
+    if (!blog) {
+      return c.json({ error: 'Blog not found' }, 404);
+    }
+
     return c.json({
       blog
     });
@@ -157,3 +171,39 @@ blogRouter.get('/:id', async (c) => {
     return c.json({ message: "Internal Server Error" }, 500);
   }
 })
+
+
+// DELETE /:id - Delete a blog (soft delete)
+blogRouter.delete('/:id', async (c) => {
+  const prisma = new PrismaClient({
+    datasourceUrl: c.env.DATABASE_URL,
+  }).$extends(withAccelerate())
+
+  const id = c.req.param('id');
+  const userId = c.get('userId') as string;
+  try {
+    // First find the blog to verify ownership
+    const blog = await prisma.blog.findUnique({
+      where: { id: id as string }
+    });
+    if (!blog) {
+      return c.json({ error: 'Blog not found' }, 404);
+    }
+    
+    // Check if user is the author
+    if (blog.authorId !== userId) {
+      return c.json({ error: 'Unauthorized' }, 403);
+    }
+    
+    // Soft delete the blog (set isDeleted to true)
+    await prisma.blog.update({
+      where: { id: id as string },
+      data: { isDeleted: true }
+    });
+    
+    return c.json({ message: 'Blog deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting blog:', error);
+    return c.json({ error: 'Failed to delete blog' }, 500);
+  }
+});

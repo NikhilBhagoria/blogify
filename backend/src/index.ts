@@ -1,5 +1,4 @@
-  import { Hono, Context, Next } from 'hono'
-import { verify } from 'hono/jwt'
+  import { Hono } from 'hono'
 import { userRouter } from './routes/user'
 import { blogRouter } from './routes/blog'
 import { cors } from 'hono/cors'
@@ -28,5 +27,11 @@ const app = new Hono<{
 app.use('/*', cors())
 app.route("/api/v1/user", userRouter);
 app.route("/api/v1/blog", blogRouter);
+
+// Error handling middleware
+app.onError((err, c) => {
+  console.error('Application error:', err);
+  return c.json({ error: 'Internal server error' }, 500);
+});
 
 export default app

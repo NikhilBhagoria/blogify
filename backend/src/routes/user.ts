@@ -51,6 +51,7 @@ userRouter.post("/signup", async (c) => {
     return c.json({
       token,
       user: {
+        id: newUser.id,
         name: newUser.name,
         email: newUser.email,
         bio: newUser.bio,
@@ -96,6 +97,7 @@ userRouter.post("/signup", async (c) => {
     return c.json({
       token,
       user: {
+        id: user.id,
         name: user.name,
         email: user.email,
         bio: user.bio,

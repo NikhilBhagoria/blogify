@@ -21,7 +21,7 @@ export const Blogs = () => {
     return (
         <div>
             <Appbar/>
-            <div className="flex flex-col items-center h-screen mt-10">
+            <div className="flex flex-col items-center h-screen mt-5 md:mt-10">
                     {blogs?.map((blog:Blog) => <BlogCard
                     key={blog.id}
                     id={blog.id}

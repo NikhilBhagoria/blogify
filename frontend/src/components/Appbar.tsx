@@ -31,16 +31,16 @@ export const Appbar = () => {
         };
     }, []);
 
-    return <div className="border-b flex justify-between px-4 py-2 md:px-10 md:py-4 bg-white">
-        <Link to={'/blogs'} className="flex flex-row items-center justify-center cursor-pointer gap-2">
-            <img src={logo} alt="logo" className="w-10 h-10 invert" />
-            <span className="text-2xl font-bold">Blogify</span>
+    return <div className="border-b flex justify-between px-3 py-2 md:px-4 md:py-3 bg-white mx-auto">
+        <Link to={'/blogs'} className="flex flex-row items-center justify-center cursor-pointer gap-1 md:gap-2">
+            <img src={logo} alt="logo" className="w-8 h-8 md:w-10 md:h-10 invert" />
+            <span className="text-xl md:text-2xl font-bold">Blogify</span>
         </Link>
-        <div className="flex flex-row items-center justify-center">
+        <div className="ml-auto flex items-center gap-2 md:gap-4">
             <Link to="/publish">
                 <button
                     type="button"
-                    className="cursor-pointer mr-4 text-white bg-green-700 hover:bg-green-800 focus:outline-none focus:ring-4 focus:ring-green-300 font-medium rounded-full text-sm px-3 py-2 md:px-5 md:py-2.5 text-center"
+                    className="border border-gray-300 rounded-full px-4 py-1 text-white bg-green-700 hover:bg-green-800 focus:outline-none focus:ring-4 focus:ring-green-300"
                 >
                     Write
                 </button>

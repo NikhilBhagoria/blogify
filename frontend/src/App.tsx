@@ -8,6 +8,7 @@ import ProtectedRoute from "./components/ProtectedRoute"
 import PublicRoute from "./components/PublicRoute"
 import NotFound from "./pages/NotFound"
 import UnderConstruction from "./pages/UnderConstruction"
+import Profile from "./pages/Profile"
 
 function App() {
 
@@ -21,7 +22,8 @@ function App() {
           <Route path="/blog/:id" element={ <ProtectedRoute> <Blog/> </ProtectedRoute>} />
           <Route path="/blogs" element={<ProtectedRoute> <Blogs/> </ProtectedRoute>} />
           <Route path="/publish" element={<ProtectedRoute> <Publish/> </ProtectedRoute>} />
-          <Route path="/profile" element={<ProtectedRoute> <UnderConstruction pageName="Profile Page" /> </ProtectedRoute>} />
+          {/* <Route path="/profile" element={<ProtectedRoute> <UnderConstruction pageName="Profile Page" /> </ProtectedRoute>} /> */}
+          <Route path="/profile" element={<ProtectedRoute> <Profile/> </ProtectedRoute>} />
           <Route path="*" element={<NotFound/>} />
         </Routes>
       </BrowserRouter>

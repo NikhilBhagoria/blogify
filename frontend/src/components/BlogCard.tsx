@@ -15,19 +15,19 @@ export const BlogCard = ({
     content,
     publishedDate
 }: BlogCardProps) => {
-    return <Link to={`/blog/${id}`} className="w-1/2 cursor-pointer">
-    <div className="flex items-center mb-2 mt-8">
+    return <Link to={`/blog/${id}`} className="w-full md:w-1/2 cursor-pointer mx-2 md:mx-0 px-3 md:px-0 mb-4 md:mb-0">
+    <div className="flex items-center mb-1 md:mb-2 mt-4 md:mt-8">
         <Avatar name={authorName} />
       {/* <div className="text-white w-7 h-7 flex justify-center items-center text-sm mr-2">
       </div> */}
       <div className="font-semibold ml-2 pr-2">{authorName} </div>
       <div className="text-gray-700 text-sm">&#x2022; {formatDate(publishedDate)}</div>
     </div>
-    <div className="font-extrabold text-3xl mb-3">{title}</div>
-    <div className="font-medium font-serif pb-4">
+    <div className="font-extrabold text-2xl md:text-3xl mb-2 md:mb-3">{title}</div>
+    <div className="font-medium font-serif pb-2 md:pb-4">
       {content.length > 190 ? content.slice(0, 190) + "..." : content}
     </div>
-    <div className="pb-8 border-b-2 border-gray-100">
+    <div className="pb-2 md:pb-4 border-b-2 border-gray-100">
       <div className="bg-gray-100 text-xs w-fit font-medium rounded-xl px-2 py-1">
         {Math.ceil(content.length / 700)} min read
       </div>
