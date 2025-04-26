@@ -12,7 +12,6 @@ const Publish = () => {
   const navigate = useNavigate();
 
   const publishPost = useCallback(async () => {
-    console.log("token", localStorage.getItem("token"));
     if (title == "" || description == "") {
       // return toast.error("Please fill all inputs");
       return alert("Please fill all inputs");
@@ -34,6 +33,7 @@ const Publish = () => {
     navigate(`/blog/${response.data.id}`);
     setIsLoading(false);
   }, [title, description]);
+
 
   return <div>
     <Appbar />

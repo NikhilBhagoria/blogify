@@ -97,7 +97,7 @@ const FullBlog = ({ blog }: { blog: Blog }) => {
                 {isOpen && (
                   <div className="absolute mt-2 bg-white rounded-md shadow-md py-1 z-50 right-0">
                     <ul className="flex flex-col gap-2">
-                      <li className="cursor-pointer hover:bg-gray-100 px-4 py-2 rounded-md">Edit</li>
+                      <li className="cursor-pointer hover:bg-gray-100 px-4 py-2 rounded-md" onClick={() => navigate(`/edit/${blog.id}`)}>Edit</li>
                       <li className="cursor-pointer hover:bg-gray-100 px-4 py-2 rounded-md" onClick={() => setIsDeleting(true)}>Delete</li>
                     </ul>
                   </div>

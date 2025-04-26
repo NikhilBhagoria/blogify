@@ -68,12 +68,21 @@ blogRouter.post("/", async (c) => {
 })
 
 // update blog
-blogRouter.put("/", async (c) => {
+blogRouter.put("/:id", async (c) => {
   const prisma = new PrismaClient({
     datasourceUrl: c.env.DATABASE_URL,
   }).$extends(withAccelerate())
   try {
     const { id, title, content } = await c.req.json()
+    const existingBlog = await prisma.blog.findUnique({
+      where: { id: id as string }
+    })
+    if (!existingBlog) {
+      return c.json({ message: "Blog not found" }, 404)
+    }
+    if(existingBlog.authorId !== c.get("userId")){
+      return c.json({ message: "Unauthorized" }, 403)
+    }
     const { success } = updateBlogInput.safeParse({ id, title, content });
     if (!success) {
       return c.json({
@@ -87,9 +96,18 @@ blogRouter.put("/", async (c) => {
       data: {
         title,
         content
+      },
+      include:{
+        author:{
+          select:{
+            id:true,
+            name:true,
+            bio:true
+          }
+        }
       }
     })
-    return c.json(blog)
+    return c.json({blog})
   } catch (error) {
     return c.json({ message: "Internal Server Error" }, 500)
   }
