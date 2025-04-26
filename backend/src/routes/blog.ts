@@ -73,7 +73,8 @@ blogRouter.put("/:id", async (c) => {
     datasourceUrl: c.env.DATABASE_URL,
   }).$extends(withAccelerate())
   try {
-    const { id, title, content } = await c.req.json()
+    const { title, content } = await c.req.json()
+    const id = c.req.param("id")
     const existingBlog = await prisma.blog.findUnique({
       where: { id: id as string }
     })
@@ -109,10 +110,12 @@ blogRouter.put("/:id", async (c) => {
     })
     return c.json({blog})
   } catch (error) {
+    console.log("error",error)
     return c.json({ message: "Internal Server Error" }, 500)
   }
 })
 
+// get all blogs
 blogRouter.get('/bulk', async (c) => {
   const prisma = new PrismaClient({
     datasourceUrl: c.env.DATABASE_URL,

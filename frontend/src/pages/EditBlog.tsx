@@ -11,6 +11,7 @@ const EditBlog = () => {
   const [fetchingBlog, setFetchingBlog] = useState(true);
   const navigate = useNavigate();
   const { id } = useParams();
+  console.log("id", id)
 
   // Fetch the blog post data
   useEffect(() => {
