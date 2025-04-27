@@ -101,5 +101,5 @@ export const useUser = () =>{
             console.error("Error fetching user:", error);
         });
     },[])
-    return {user}
+    return {user,setUser}
 }

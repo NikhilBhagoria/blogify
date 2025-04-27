@@ -1,43 +1,34 @@
 import { useEffect, useState } from "react";
 import { Appbar } from "../components/Appbar";
 import { useUser } from "../hooks";
+import axios from "axios";
+import { BACKEND_URL } from "../config";
 
 const Profile = () => {
-  const {user} = useUser();
-  const [name, setName] = useState(user?.name || '');
-  const [bio, setBio] = useState(user?.bio || '');
-  const [showModal, setShowModal] = useState(true);
+  const { user,setUser } = useUser();
+  const [name, setName] = useState('');
+  const [bio, setBio] = useState('');
+  const [showModal, setShowModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     if (user) {
       setName(user.name || '');
       setBio(user.bio || '');
     }
-  }, [user]); 
+  }, [user]);
+
+  // Reset edit fields when opening modal
+  const openEditModal = () => {
+    // Reset form values to current user values when opening modal
+    setName(user?.name || '');
+    setBio(user?.bio || '');
+    setError('');
+    setShowModal(true);
+  };
 
 
-  // console.log("user",user);
-  // const [isEditProfile, setIsEditProfile] = useState(false);
-  // // const [bio, setBio] = useState(user?.bio || "");
-  // const handleEditProfile = () => {
-  //   setIsEditProfile(!isEditProfile);
-  // }
-  // const handleSaveProfile = () => {
-  //   axios.put(`${BACKEND_URL}/api/v1/user/profile`, {
-  //     bio,
-  //   }, {
-  //     headers: {
-  //       Authorization: `Bearer ${localStorage.getItem("token")}`,
-  //     },
-  //   })
-  //   .then((res) => {
-  //       setIsEditProfile(false);
-  //     console.log("res",res);
-  //   })
-  //   .catch((err) => {
-  //     console.log("err",err);
-  //   })
-  // }
   // return (
   //   <div>
   //       <Appbar />
@@ -65,10 +56,70 @@ const Profile = () => {
   //       </div>
   //   </div>
   // )
+
+
+  const handleSaveProfile = async () => {
+        // Clear previous errors
+        setError('');
+
+    // Validation
+    if (!name.trim()) {
+      setError("Name cannot be empty");
+      return;
+    }
+    
+    if (!bio.trim()) {
+      setError("Bio cannot be empty");
+      return;
+    }
+    
+    if (name.length > 50) {
+      setError("Name must be less than 50 characters");
+      return;
+    }
+    
+    if (bio.length > 160) {
+      setError("Bio must be less than 160 characters");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const response = await axios.put(
+        `${BACKEND_URL}/api/v1/user/profile`,
+        { name, bio },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      if (response.data.success) {
+        // Update local user state if needed
+        const updatedUser = response.data.user;
+        setUser({
+          ...user,
+          name: updatedUser.name,
+          bio: updatedUser.bio,
+          email:user?.email || ''
+        });
+        setName(updatedUser.name);
+        setBio(updatedUser.bio);
+        setShowModal(false);
+        // You might want to update the user context here
+      }
+    } catch (error) {
+      console.error("Error saving profile:", error);
+      // Add error handling/notification here
+    } finally {
+      setIsLoading(false);
+    }
+  };
   return (
-  <div className="bg-gray-100 min-h-screen">
+    <div className="bg-gray-100 min-h-screen">
       {/* Header */}
-        <Appbar />
+      <Appbar />
 
       {/* Main Content */}
       <main className="max-w-5xl mx-auto px-4 py-8">
@@ -86,41 +137,41 @@ const Profile = () => {
         {/* Settings Options */}
         <div className="space-y-7">
           <div className="flex justify-between">
-            <h2 className="text-sm font-medium text-gray-600 mb-1">Email address</h2>
-            <p className="text-sm text-gray-500">{user?.email}</p>
+            <h2 className="text-sm font-medium text-gray-600 hover:text-gray-800 cursor-pointer mb-1">Email address</h2>
+            <p className="text-sm text-gray-500">{user?.email || "Not available"}</p>
           </div>
 
           <div className="flex justify-between">
-            <h2 className="text-sm font-medium text-gray-600 mb-1">Username and subdomain</h2>
-            <p className="text-sm text-gray-500">{user?.name}</p>
+            <h2 className="text-sm font-medium text-gray-600 hover:text-gray-800 mb-1 cursor-pointer">Username and subdomain</h2>
+            <p className="text-sm text-gray-500">{user?.name || "Not set"}</p>
           </div>
 
           <div>
-            <button className="text-sm font-medium text-gray-600 mb-1 cursor-pointer" onClick={() => setShowModal(true)}>Profile information</button>
+            <button className="text-sm font-medium text-gray-600 hover:text-gray-800 mb-1 cursor-pointer" onClick={openEditModal}>Profile information</button>
             <p className="text-sm text-gray-500">Edit your photo, name, pronouns, short bio, etc.</p>
           </div>
 
           <div>
-            <h2 className="text-sm font-medium text-gray-600 mb-1">Profile design</h2>
+            <h2 className="text-sm font-medium text-gray-600 hover:text-gray-800 mb-1 cursor-pointer">Profile design</h2>
             <p className="text-sm text-gray-500">Customize the appearance of your profile.</p>
           </div>
 
           <div>
-            <h2 className="text-sm font-medium text-gray-600 mb-1">Custom domain</h2>
+            <h2 className="text-sm font-medium text-gray-600 hover:text-gray-800 mb-1">Custom domain</h2>
             <p className="text-sm text-gray-500">Upgrade to a Medium Membership to redirect to your own domain.</p>
           </div>
 
           <div>
-            <h2 className="text-sm font-medium text-gray-600 mb-1">Partner Program</h2>
+            <h2 className="text-sm font-medium text-gray-600 hover:text-gray-800 mb-1 cursor-pointer">Partner Program</h2>
             <p className="text-sm text-gray-500">You are not enrolled in the Partner Program.</p>
           </div>
 
           <div>
-            <h2 className="text-sm font-medium text-gray-600 mb-1">Muted writers and publications</h2>
+            <h2 className="text-sm font-medium text-gray-600 hover:text-gray-800 mb-1 cursor-pointer">Muted writers and publications</h2>
           </div>
 
           <div>
-            <h2 className="text-sm font-medium text-gray-600 mb-1">Blocked users</h2>
+            <h2 className="text-sm font-medium text-gray-600 hover:text-gray-800 mb-1 cursor-pointer">Blocked users</h2>
           </div>
 
           <div>
@@ -157,8 +208,8 @@ const Profile = () => {
 
             <div className="mb-2">
               <label className="text-sm font-medium">Name<span className="text-red-500">*</span></label>
-              <input 
-                type="text" 
+              <input
+                type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="w-full border border-gray-300 rounded p-2 mt-1"
@@ -185,7 +236,7 @@ const Profile = () => {
 
             <div className="mb-2">
               <label className="text-sm font-medium">Short bio</label>
-              <textarea 
+              <textarea
                 value={bio}
                 onChange={(e) => setBio(e.target.value)}
                 className="w-full border border-gray-300 rounded p-2 mt-1 h-24"
@@ -195,6 +246,8 @@ const Profile = () => {
                 <span className={`text-xs ${bio.length > 160 ? 'text-red-500' : 'text-gray-500'}`}>{bio.length}/160</span>
               </div>
             </div>
+            {error && <div className="text-red-500 text-sm mb-2">{error}</div>}
+
 
             {/* <div className="mb-2">
               <div className="flex justify-between items-center">
@@ -212,8 +265,13 @@ const Profile = () => {
               <button className="px-4 py-2 border border-gray-300 rounded-full text-sm cursor-pointer" onClick={() => setShowModal(false)}>
                 Cancel
               </button>
-              <button className="px-4 py-2 bg-green-100 text-green-700 rounded-full text-sm font-medium cursor-pointer">
-                Save
+              <button
+                className={`px-4 py-2 bg-green-100 text-green-700 rounded-full text-sm font-medium cursor-pointer ${isLoading ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
+                onClick={handleSaveProfile}
+                disabled={isLoading}
+              >
+                {isLoading ? 'Saving...' : 'Save'}
               </button>
             </div>
           </div>

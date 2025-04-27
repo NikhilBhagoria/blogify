@@ -5,49 +5,49 @@ import { sign, verify } from "hono/jwt";
 import { signinInput, signupInput, SignupInput } from '@nikhilbhagoria/medium-common';
 
 export const userRouter = new Hono<{
-    Bindings: {
-      DATABASE_URL: string
-      JWT_SECRET: string
-    }
-  }>()
+  Bindings: {
+    DATABASE_URL: string
+    JWT_SECRET: string
+  }
+}>()
 
 userRouter.post("/signup", async (c) => {
-    const prisma = new PrismaClient({
-      datasourceUrl: c.env.DATABASE_URL,
-    }).$extends(withAccelerate())
-  
-    const body = await c.req.json();
-    const {success} = signupInput.safeParse(body);
-    console.log("err",success,body);
-    if(!success){
-      return c.json({message:"Input not correct"},411);
+  const prisma = new PrismaClient({
+    datasourceUrl: c.env.DATABASE_URL,
+  }).$extends(withAccelerate())
+
+  const body = await c.req.json();
+  const { success } = signupInput.safeParse(body);
+  console.log("err", success, body);
+  if (!success) {
+    return c.json({ message: "Input not correct" }, 411);
+  }
+
+  const { username, password, name } = body;
+  const user = await prisma.user.findUnique({
+    where: {
+      email: username,
     }
-  
-    const { username, password, name } = body;
-    const user = await prisma.user.findUnique({
-      where: {
-        email:username,
-      }
-    })
-    if (user) {
-      return c.json({
-        message: "User already exists",
-      }, 400)
-    }
-    try {
-      const newUser = await prisma.user.create({
-        data: {
-        email:username,
+  })
+  if (user) {
+    return c.json({
+      message: "User already exists",
+    }, 400)
+  }
+  try {
+    const newUser = await prisma.user.create({
+      data: {
+        email: username,
         password,
         name,
       }
-      })
-  
+    })
+
     const token = await sign({
       id: newUser.id,
       email: newUser.email,
     }, c.env.JWT_SECRET)
-  
+
     return c.json({
       token,
       user: {
@@ -57,27 +57,27 @@ userRouter.post("/signup", async (c) => {
         bio: newUser.bio,
       },
     })
-    } catch (error) {
-      return c.json({
-        message: "User already exists",
-      }, 400)
-    }
-  })
-  userRouter.post("/signin", async (c) => {
-    const prisma = new PrismaClient({
-      datasourceUrl: c.env.DATABASE_URL,
-    }).$extends(withAccelerate())
-  
-    try {
+  } catch (error) {
+    return c.json({
+      message: "User already exists",
+    }, 400)
+  }
+})
+userRouter.post("/signin", async (c) => {
+  const prisma = new PrismaClient({
+    datasourceUrl: c.env.DATABASE_URL,
+  }).$extends(withAccelerate())
+
+  try {
     const body = await c.req.json();
-    const {success} = signinInput.safeParse(body);
-    if(!success){
-      return c.json({message:"Enter correct email and password"},411);
+    const { success } = signinInput.safeParse(body);
+    if (!success) {
+      return c.json({ message: "Enter correct email and password" }, 411);
     }
     const { username, password } = body;
     const user = await prisma.user.findUnique({
       where: {
-        email:username,
+        email: username,
       }
     })
     if (!user) {
@@ -103,41 +103,51 @@ userRouter.post("/signup", async (c) => {
         bio: user.bio,
       },
     })
-    } catch (error) {
-      return c.json({
-        message: "Internal server error",
-      }, 500)
-    }
-  })
+  } catch (error) {
+    return c.json({
+      message: "Internal server error",
+    }, 500)
+  }
+})
 
+
+// Update user profile
 userRouter.put("/profile", async (c) => {
   const prisma = new PrismaClient({
     datasourceUrl: c.env.DATABASE_URL,
   }).$extends(withAccelerate())
-  try{
+  try {
     const token = c.req.header("Authorization")?.split(" ")[1];
-    if(!token){
+    if (!token) {
       return c.json({
         message: "Unauthorized",
       }, 401)
     }
     const decoded = await verify(token, c.env.JWT_SECRET)
-    if(!decoded){
+    if (!decoded) {
       return c.json({
         message: "Unauthorized",
       }, 401)
     }
-    const {bio} = await c.req.json();
+    const { name,bio } = await c.req.json();
     const user = await prisma.user.update({
       where: {
         id: decoded.id,
       },
       data: {
+        name,
         bio,
       },
-    })
+      select:{
+        id:true,
+        name:true,
+        email:true,
+        bio:true,
+      },
+    });
     return c.json({
-      message: "Profile updated successfully",
+      success:true,
+      user
     })
   } catch (error) {
     return c.json({
@@ -146,39 +156,45 @@ userRouter.put("/profile", async (c) => {
   }
 })
 
+// Get User Profile
 userRouter.get("/me", async (c) => {
   const prisma = new PrismaClient({
     datasourceUrl: c.env.DATABASE_URL,
   }).$extends(withAccelerate())
-  try{
-  const token = c.req.header("Authorization")?.split(" ")[1];
-  if(!token){
+  try {
+    const token = c.req.header("Authorization")?.split(" ")[1];
+    if (!token) {
+      return c.json({
+        message: "Unauthorized",
+      }, 401)
+    }
+    const decoded = await verify(token, c.env.JWT_SECRET)
+    if (!decoded) {
+      return c.json({
+        message: "Unauthorized",
+      }, 401)
+    }
+    const user = await prisma.user.findUnique({
+      where: {
+        id: decoded.id,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        bio: true,
+      },
+    })
+
+    if(!user){
+      return c.json({message: "User not found"},404);
+    }
     return c.json({
-      message: "Unauthorized",
-    }, 401)
-  }
-  const decoded = await verify(token, c.env.JWT_SECRET)
-  if(!decoded){
+      user
+    })
+  } catch (error) {
     return c.json({
-      message: "Unauthorized",
-    }, 401)
+      message: "Internal server error",
+    }, 500)
   }
-  const user = await prisma.user.findUnique({
-    where: {
-      id: decoded.id,
-    },
-    select: {
-      name: true,
-      email: true,
-      bio: true,
-    },
-  })
-  return c.json({
-    user,
-  })
-} catch (error) {
-  return c.json({
-    message: "Internal server error",
-  }, 500)
-}
 })
