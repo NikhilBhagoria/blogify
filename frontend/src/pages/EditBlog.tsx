@@ -42,7 +42,7 @@ const EditBlog = () => {
     
     setIsLoading(true);
     try {
-      const response = await axios.put(
+      await axios.put(
         `${BACKEND_URL}/api/v1/blog/${id}`,
         {
           title,
