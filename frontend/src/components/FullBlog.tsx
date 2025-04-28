@@ -1,6 +1,6 @@
 import { memo, useEffect, useRef, useState } from "react";
 import { Blog } from "../hooks";
-import { Avatar } from "./Avatar";
+// import { Avatar } from "./Avatar";
 import { useNavigate } from "react-router";
 import { BACKEND_URL } from "../config";
 
