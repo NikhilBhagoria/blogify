@@ -2,18 +2,17 @@ import { Context, Hono } from "hono";
 import { PrismaClient } from '@prisma/client/edge'
 import { withAccelerate } from "@prisma/extension-accelerate";
 
-export const userRouter = new Hono<{
-    Bindings: {
-      DATABASE_URL: string
-      JWT_SECRET: string
-    }
-  }>()
-
 export async function checkUserDeleted(c: Context, next: Function) {
     try {
         const prisma = new PrismaClient({
             datasourceUrl: c.env.DATABASE_URL,
         }).$extends(withAccelerate())
+
+        const token = c.req.header("Authorization")?.replace("Bearer ", "");
+
+        if (!token) {
+            return await next();
+        }
 
         const user = await prisma.user.findUnique({
             where: { id: c.get("userId") as string },
@@ -33,5 +32,6 @@ export async function checkUserDeleted(c: Context, next: Function) {
         await next();
     } catch (e) {
         console.log("err", e);
+        return c.json({ message: "Internal server error" }, 500);
     }
 }

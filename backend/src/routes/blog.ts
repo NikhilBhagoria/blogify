@@ -15,11 +15,16 @@ export const blogRouter = new Hono<{
 }>();
 
 blogRouter.use("/*", jwtMiddleware);
+// Create a Prisma client function to avoid repeating the same code
+const getPrismaClient = (databaseUrl:any) => {
+  return new PrismaClient({
+    datasourceUrl: databaseUrl,
+  }).$extends(withAccelerate());
+};
 
 blogRouter.post("/", async (c) => {
-  const prisma = new PrismaClient({
-    datasourceUrl: c.env.DATABASE_URL,
-  }).$extends(withAccelerate())
+    const prisma = getPrismaClient(c.env.DATABASE_URL);
+
   try {
     const body = await c.req.json();
     const { success } = createBlogInput.safeParse(body);
@@ -49,14 +54,21 @@ blogRouter.post("/", async (c) => {
 
 // update blog
 blogRouter.put("/:id", async (c) => {
-  const prisma = new PrismaClient({
-    datasourceUrl: c.env.DATABASE_URL,
-  }).$extends(withAccelerate())
+    const prisma = getPrismaClient(c.env.DATABASE_URL);
+
   try {
     const { title, content } = await c.req.json()
     const id = c.req.param("id")
+    
+    const { success } = updateBlogInput.safeParse({ id, title, content });
+    if (!success) {
+      return c.json({
+        message: "Input not correct"
+      }, 411)
+    }
+
     const existingBlog = await prisma.blog.findUnique({
-      where: { id: id as string }
+      where: { id: id as string , isDeleted:false}
     })
     if (!existingBlog) {
       return c.json({ message: "Blog not found" }, 404)
@@ -64,12 +76,7 @@ blogRouter.put("/:id", async (c) => {
     if(existingBlog.authorId !== c.get("userId")){
       return c.json({ message: "Unauthorized" }, 403)
     }
-    const { success } = updateBlogInput.safeParse({ id, title, content });
-    if (!success) {
-      return c.json({
-        message: "Input not correct"
-      }, 411)
-    }
+
     const blog = await prisma.blog.update({
       where: {
         id
@@ -98,13 +105,15 @@ blogRouter.put("/:id", async (c) => {
 // get all blogs
 blogRouter.get('/bulk', async (c) => {
   console.log("enter bulk")
-  const prisma = new PrismaClient({
-    datasourceUrl: c.env.DATABASE_URL,
-  }).$extends(withAccelerate())
+    const prisma = getPrismaClient(c.env.DATABASE_URL);
+
   try {
     const blogs = await prisma.blog.findMany({
       where:{
-        isDeleted: false
+        isDeleted: false,
+        author:{
+          isDeleted:false
+        }
       },
       select: {
         content: true,
@@ -134,15 +143,17 @@ blogRouter.get('/bulk', async (c) => {
 })
 
 blogRouter.get('/:id', async (c) => {
-  const prisma = new PrismaClient({
-    datasourceUrl: c.env.DATABASE_URL,
-  }).$extends(withAccelerate())
+    const prisma = getPrismaClient(c.env.DATABASE_URL);
+
   try {
     const id = c.req.param("id");
     const blog = await prisma.blog.findUnique({
       where: {
         id,
-        isDeleted: false
+        isDeleted: false,
+        author:{
+          isDeleted:false
+        }
       },
       select:{
         id:true,
@@ -177,16 +188,13 @@ blogRouter.get('/:id', async (c) => {
 
 // DELETE /:id - Delete a blog (soft delete)
 blogRouter.delete('/:id', async (c) => {
-  const prisma = new PrismaClient({
-    datasourceUrl: c.env.DATABASE_URL,
-  }).$extends(withAccelerate())
-
+    const prisma = getPrismaClient(c.env.DATABASE_URL);
   const id = c.req.param('id');
   const userId = c.get('userId') as string;
   try {
     // First find the blog to verify ownership
     const blog = await prisma.blog.findUnique({
-      where: { id: id as string }
+      where: { id: id as string, isDeleted:false }
     });
     if (!blog) {
       return c.json({ error: 'Blog not found' }, 404);

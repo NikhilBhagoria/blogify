@@ -26,7 +26,7 @@ const app = new Hono<{
 
 //c => context
 app.use('/*', cors())
-app.use('/*',checkUserDeleted);
+// app.use('/*',checkUserDeleted);
 app.route("/api/v1/user", userRouter);
 app.route("/api/v1/blog", blogRouter);
 

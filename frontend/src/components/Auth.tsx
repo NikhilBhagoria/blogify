@@ -16,7 +16,6 @@ export const Auth = ({ type }: { type: "signup" | "signin" }) => {
     }); // change the name of username to email
 
     async function sendRequest(e: React.FormEvent<HTMLFormElement>) {
-        console.log("api");
         e.preventDefault();
         try {
             setIsLoading(true);
@@ -27,7 +26,6 @@ export const Auth = ({ type }: { type: "signup" | "signin" }) => {
             localStorage.setItem("user", JSON.stringify(user));
             navigate("/blogs");
         } catch (e: any) {
-            console.log("ee", e);
             setError(e.response.data.message)
             // alert the user here that the request failed
         } finally {

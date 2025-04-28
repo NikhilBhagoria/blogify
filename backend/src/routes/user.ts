@@ -15,7 +15,7 @@ export const userRouter = new Hono<{
 userRouter.post("/signup", async (c) => {
   const prisma = new PrismaClient({
     datasourceUrl: c.env.DATABASE_URL,
-  }).$extends(withAccelerate())
+  }).$extends(withAccelerate());
 
   try {
     const body = await c.req.json();
@@ -29,61 +29,57 @@ userRouter.post("/signup", async (c) => {
       where: {
         email: username,
       }
-    })
+    });
 
-    if (user) {
+    // Check if user exists and is not deleted
+    if (user && !user.isDeleted) {
       return c.json({
         message: "User already exists",
-      }, 400)
+      }, 400);
     }
 
-    // if (user && !user.isDeleted) {
-    //   return c.json({
-    //     message: "User already exists",
-    //   }, 400)
-    // }
-
     // If user exists but is deleted, update the existing record
-    // if (user && user.isDeleted) {
-    //    // Update the deleted user
-    //    const updatedUser = await prisma.user.update({
-    //     where: { email:username },
-    //     data: {
-    //       name,
-    //       password,
-    //       isDeleted: false, // Reactivate the account
-    //       bio: "No bio yet" // Reset the bio
-    //     }
-    //   });
-    //   const token = await sign({
-    //     id: updatedUser.id,
-    //     email: updatedUser.email,
-    //   }, c.env.JWT_SECRET)
+    if (user && user.isDeleted) {
+      const updatedUser = await prisma.user.update({
+        where: { email: username },
+        data: {
+          name,
+          password, // Should hash password here
+          isDeleted: false,
+          bio: "No bio yet"
+        }
+      });
 
-    //   return c.json({
-    //     token,
-    //     user: {
-    //       id: updatedUser.id,
-    //       email: updatedUser.email,
-    //       name: updatedUser.name
-    //     }
-    //   }, 201);
+      const token = await sign({
+        id: updatedUser.id,
+        email: updatedUser.email,
+      }, c.env.JWT_SECRET);
 
-    // }
+      return c.json({
+        token,
+        user: {
+          id: updatedUser.id,
+          email: updatedUser.email,
+          name: updatedUser.name,
+          bio: updatedUser.bio // Added bio to match the create flow
+        }
+      }, 200); // Changed to 200 to match the create flow
+    }
 
-
+    // Create new user if doesn't exist
     const newUser = await prisma.user.create({
       data: {
         email: username,
-        password,
+        password, // Should hash password here
         name,
+        bio: "No bio yet" // Add default bio to match the update flow
       }
-    })
+    });
 
     const token = await sign({
       id: newUser.id,
       email: newUser.email,
-    }, c.env.JWT_SECRET)
+    }, c.env.JWT_SECRET);
 
     return c.json({
       token,
@@ -93,13 +89,16 @@ userRouter.post("/signup", async (c) => {
         email: newUser.email,
         bio: newUser.bio,
       },
-    },200)
+    }, 201); // Changed to 201 (Created) for new resource creation
   } catch (error) {
+    console.error("Signup error:", error);
     return c.json({
-      message:'Failed to create user',
-    }, 500)
+      message: 'Failed to create user',
+    }, 500);
   }
-})
+});
+
+
 userRouter.post("/signin", async (c) => {
   const prisma = new PrismaClient({
     datasourceUrl: c.env.DATABASE_URL,
@@ -205,21 +204,12 @@ userRouter.get("/me", async (c) => {
     datasourceUrl: c.env.DATABASE_URL,
   }).$extends(withAccelerate())
   try {
-    const token = c.req.header("Authorization")?.split(" ")[1];
-    if (!token) {
-      return c.json({
-        message: "Unauthorized",
-      }, 401)
-    }
-    const decoded = await verify(token, c.env.JWT_SECRET)
-    if (!decoded) {
-      return c.json({
-        message: "Unauthorized",
-      }, 401)
-    }
+    const decoded = c.get('userId') as string;
+
     const user = await prisma.user.findUnique({
       where: {
-        id: decoded.id,
+        id: decoded as string,
+        isDeleted: false
       },
       select: {
         id: true,
@@ -233,10 +223,12 @@ userRouter.get("/me", async (c) => {
       return c.json({ message: "User not found" }, 404);
     }
     return c.json({
+      success: true,
       user
     })
   } catch (error) {
     return c.json({
+      success: false,
       message: "Internal server error",
     }, 500)
   }
@@ -273,9 +265,15 @@ userRouter.delete("/delete", async (c) => {
       data: { isDeleted: true }
     });
 
-    return c.json({ message: 'Account deleted successfully' });
+    return c.json({
+      success: true,
+      message: 'Account deleted successfully'
+    });
   } catch (error) {
     console.error('Error deleting user:', error);
-    return c.json({ error: 'Failed to delete account' }, 500);
+    return c.json({
+      success: false,
+      error: 'Failed to delete account'
+    }, 500);
   }
 })

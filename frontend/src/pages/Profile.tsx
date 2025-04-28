@@ -3,14 +3,20 @@ import { Appbar } from "../components/Appbar";
 import { useUser } from "../hooks";
 import axios from "axios";
 import { BACKEND_URL } from "../config";
+import { useNavigate } from "react-router";
 
 const Profile = () => {
-  const { user,setUser } = useUser();
+  const { user, setUser } = useUser();
+  const navigate = useNavigate();
   const [name, setName] = useState('');
   const [bio, setBio] = useState('');
   const [showModal, setShowModal] = useState(false);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState('');
+  const [deleteError, setDeleteError] = useState('');
 
   useEffect(() => {
     if (user) {
@@ -21,46 +27,14 @@ const Profile = () => {
 
   // Reset edit fields when opening modal
   const openEditModal = () => {
-    // Reset form values to current user values when opening modal
     setName(user?.name || '');
     setBio(user?.bio || '');
     setError('');
     setShowModal(true);
   };
 
-
-  // return (
-  //   <div>
-  //       <Appbar />
-  //       <div className="pt-12">
-  //           <div className="grid grid-cols-1 md:grid-cols-12 gap-4 px-[12%]">
-  //               <div className="col-span-8 bg-gray-100 p-4 rounded-lg">
-  //                   <h1 className="text-2xl font-bold">{user?.name}</h1>
-  //                   <p className="text-gray-500">{user?.bio}</p>
-  //               </div>
-  //               <div className="col-span-4 p-4 rounded-lg bg-gray-100">
-  //                   {isEditProfile ? <EditProfile bio={bio} setBio={setBio} handleSaveProfile={handleSaveProfile} /> : (
-  //                   <div className="flex flex-col gap-4 justify-center items-center">
-  //                       <div className="flex flex-col gap-2 justify-center items-center">
-  //                           <img src={ "./src/assets/default_image.png"} alt="Profile" className="w-10 h-10 rounded-full bg-gray-300 p-1" />
-  //                           <div className="flex flex-col gap-2 justify-center items-center">
-  //                               <h1 className="text-2xl font-bold">{user?.name}</h1>
-  //                               <p className="text-gray-500">{user?.bio}</p>
-  //                           </div>
-  //                           <button className="cursor-pointer rounded-lg text-green-400" onClick={handleEditProfile}>Edit Profile</button>
-  //                       </div>
-  //                   </div>
-  //                   )}
-  //               </div>
-  //           </div>
-  //       </div>
-  //   </div>
-  // )
-
-
   const handleSaveProfile = async () => {
-        // Clear previous errors
-        setError('');
+    setError('');
 
     // Validation
     if (!name.trim()) {
@@ -96,51 +70,70 @@ const Profile = () => {
       );
 
       if (response.data.success) {
-        // Update local user state if needed
         const updatedUser = response.data.user;
         setUser({
           ...user,
           name: updatedUser.name,
           bio: updatedUser.bio,
-          email:user?.email || ''
+          email: user?.email || ''
         });
         setName(updatedUser.name);
         setBio(updatedUser.bio);
         setShowModal(false);
-        // You might want to update the user context here
       }
     } catch (error) {
       console.error("Error saving profile:", error);
-      // Add error handling/notification here
+      setError("Failed to update profile. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
 
-  // In your AccountSettings component
-const deleteAccount = async () => {
-  try {
-    // setIsDeleting(true);
-    await axios.delete(`${BACKEND_URL}/api/v1/user/delete`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
-    });
-    
-    // Log the user out
-    // logout();
-    
-    // Redirect to home page
-    // navigate('/');
-    
-  } catch (error) {
-    console.error('Error deleting account:', error);
-    alert('Failed to delete account. Please try again later.');
-  } finally {
-    // setIsDeleting(false);
-    // setShowConfirmation(false);
-  }
-}; 
+  // Show delete confirmation modal
+  const confirmDeleteAccount = () => {
+    setDeleteConfirmText('');
+    setDeleteError('');
+    setShowDeleteConfirmation(true);
+  };
+
+  // Delete account function
+  const deleteAccount = async () => {
+    // Validate confirmation text
+    if (deleteConfirmText !== 'delete my account') {
+      setDeleteError("Please type 'delete my account' to confirm");
+      return;
+    }
+
+    try {
+      setIsDeleting(true);
+      setDeleteError('');
+      
+      const response = await axios.delete(`${BACKEND_URL}/api/v1/user/delete`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+      
+      if (response.data.message === 'Account deleted successfully') {
+        // Clear local storage
+        localStorage.removeItem('token');
+        
+        // Log the user out
+        localStorage.removeItem('user');
+        
+        // Redirect to home page
+        navigate('/');
+      } else {
+        throw new Error(response.data.error || 'Failed to delete account');
+      }
+    } catch (error) {
+      console.error('Error deleting account:', error);
+      setDeleteError(error.response?.data?.error || 'Failed to delete account. Please try again later.');
+    } finally {
+      setIsDeleting(false);
+    }
+  }; 
+
   return (
     <div className="bg-gray-100 min-h-screen">
       {/* Header */}
@@ -200,7 +193,7 @@ const deleteAccount = async () => {
           </div>
 
           <div>
-            <button className="text-sm font-medium text-red-500 mb-1 cursor-pointer" onClick={deleteAccount}>Delete account</button>
+            <button className="text-sm font-medium text-red-500 mb-1 cursor-pointer" onClick={confirmDeleteAccount}>Delete account</button>
             <p className="text-xs text-gray-500">Permanently delete your account and all of your content.</p>
           </div>
         </div>
@@ -208,7 +201,7 @@ const deleteAccount = async () => {
 
       {/* Profile Information Modal */}
       {showModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-opacity-50 bg-gray-400/50">
+        <div className="fixed inset-0 flex items-center justify-center bg-opacity-50 bg-gray-400/50 z-50">
           <div className="bg-white rounded-md w-full max-w-md p-6">
             <div className="flex justify-between items-center mb-3">
               <h2 className="text-xl font-bold">Profile information</h2>
@@ -245,20 +238,6 @@ const deleteAccount = async () => {
               </div>
             </div>
 
-            {/* <div className="mb-2">
-              <label className="text-sm font-medium">Pronouns</label>
-              <input 
-                type="text" 
-                value={pronouns}
-                onChange={(e) => setPronouns(e.target.value)}
-                className="w-full border border-gray-300 rounded p-2 mt-1"
-                placeholder="Add..."
-              />
-              <div className="flex justify-end mt-1">
-                <span className={`text-xs ${pronouns.length > 4 ? 'text-red-500' : 'text-gray-500'}`}>{pronouns.length}/4</span>
-              </div>
-            </div> */}
-
             <div className="mb-2">
               <label className="text-sm font-medium">Short bio</label>
               <textarea
@@ -273,26 +252,12 @@ const deleteAccount = async () => {
             </div>
             {error && <div className="text-red-500 text-sm mb-2">{error}</div>}
 
-
-            {/* <div className="mb-2">
-              <div className="flex justify-between items-center">
-                <h3 className="text-sm font-medium">About Page</h3>
-                <button className="text-gray-400">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M7 17L17 7M7 7h10v10" />
-                  </svg>
-                </button>
-              </div>
-              <p className="text-xs text-gray-500 mt-1">Personalize with images and more to paint more of a vivid portrait of yourself than your "Short bio".</p>
-            </div> */}
-
             <div className="flex justify-end gap-2">
               <button className="px-4 py-2 border border-gray-300 rounded-full text-sm cursor-pointer" onClick={() => setShowModal(false)}>
                 Cancel
               </button>
               <button
-                className={`px-4 py-2 bg-green-100 text-green-700 rounded-full text-sm font-medium cursor-pointer ${isLoading ? 'opacity-50 cursor-not-allowed' : ''
-                  }`}
+                className={`px-4 py-2 bg-green-100 text-green-700 rounded-full text-sm font-medium cursor-pointer ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
                 onClick={handleSaveProfile}
                 disabled={isLoading}
               >
@@ -302,18 +267,78 @@ const deleteAccount = async () => {
           </div>
         </div>
       )}
+
+      {/* Delete Account Confirmation Modal */}
+      {showDeleteConfirmation && (
+        <div className="fixed inset-0 flex items-center justify-center bg-opacity-50 bg-gray-400/50 z-50">
+          <div className="bg-white rounded-md w-full max-w-md p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-red-600">Delete Account</h2>
+              <button onClick={() => setShowDeleteConfirmation(false)} className="text-gray-400 hover:text-gray-600 cursor-pointer">
+                ✕
+              </button>
+            </div>
+
+            <div className="mb-6">
+              <div className="bg-red-50 border border-red-200 rounded-md p-4 mb-4">
+                <div className="flex items-center mb-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                  <h3 className="font-medium text-red-800">Warning: This action cannot be undone</h3>
+                </div>
+                <p className="text-sm text-red-700">
+                  Deleting your account will permanently remove all your data including:
+                </p>
+                <ul className="list-disc list-inside mt-2 text-sm text-red-700 ml-2">
+                  <li>All your posts and comments</li>
+                  <li>Your profile information</li>
+                  <li>Your reading history and preferences</li>
+                  <li>Followers and following relationships</li>
+                </ul>
+              </div>
+              
+              <p className="text-sm text-gray-600 mb-4">
+                Please type <strong>delete my account</strong> below to confirm:
+              </p>
+              
+              <input
+                type="text"
+                className="w-full border border-gray-300 rounded p-2 mb-4"
+                placeholder="Type 'delete my account'"
+                value={deleteConfirmText}
+                onChange={(e) => setDeleteConfirmText(e.target.value)}
+              />
+              
+              {deleteError && (
+                <div className="text-red-500 text-sm mb-4">
+                  {deleteError}
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-end gap-2">
+              <button 
+                className="px-4 py-2 border border-gray-300 rounded-full text-sm cursor-pointer" 
+                onClick={() => setShowDeleteConfirmation(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className={`px-4 py-2 bg-red-600 text-white rounded-full text-sm font-medium ${
+                  isDeleting || deleteConfirmText !== 'delete my account' ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+                }`}
+                onClick={deleteAccount}
+                disabled={isDeleting || deleteConfirmText !== 'delete my account'}
+              >
+                {isDeleting ? 'Deleting...' : 'Delete My Account'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
-
-
-// const EditProfile = ({ bio, setBio, handleSaveProfile}: {bio: string, setBio: (bio: string) => void, handleSaveProfile: () => void}) => {
-//     return <div className="flex flex-col gap-4 justify-center items-center">
-//             <h1>Edit Profile</h1>
-//             <input type="text" placeholder="Bio" className="w-full p-2 rounded-lg bg-gray-200 focus:outline-none" value={bio} onChange={(e) => setBio(e.target.value)} />
-//             <button className="cursor-pointer rounded-lg text-green-400" onClick={handleSaveProfile}>Save</button>
-//         </div>
-// }
-
-export default Profile
+export default Profile;
