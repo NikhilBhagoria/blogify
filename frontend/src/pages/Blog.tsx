@@ -15,7 +15,6 @@ const Blog = () => {
       {loading ? (
         <div className="flex justify-around items-center">
           <BlogSkeleton />
-          <BlogSkeleton />
         </div>
       ) : error ? (
         <div className="flex flex-col items-center justify-center h-[50vh] text-center px-4">
