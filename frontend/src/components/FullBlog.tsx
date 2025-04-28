@@ -75,7 +75,7 @@ const FullBlog = ({ blog }: { blog: Blog }) => {
   return (
     <>
       <div className="pt-8 md:pt-12">
-        <div className="grid grid-cols-12 px-[12%] w-full max-w-screen-2xl">
+        <div className="grid grid-cols-12 px-[8%] md:px-[12%] w-full max-w-screen-2xl">
           <div className="col-span-12">
             <div className="md:text-5xl text-3xl w-full font-extrabold wrap-break-word text-center">
               {blog.title}
