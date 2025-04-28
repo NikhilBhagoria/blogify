@@ -146,9 +146,9 @@ const Profile = () => {
         {/* Navigation Tabs */}
         <div className="border-b border-gray-300 mb-8">
           <div className="flex">
-            <button className="px-4 py-2 border-b-2 border-black font-medium">Account</button>
-            <button className="px-4 py-2 text-gray-500">Publishing</button>
-            <button className="px-4 py-2 text-gray-500">Notifications</button>
+            <button className="px-3 py-1 md:px-4 md:py-2 border-b-2 border-black font-medium">Account</button>
+            <button className="px-3 py-1 md:px-4 md:py-2 text-gray-500">Publishing</button>
+            <button className="px-3 py-1 md:px-4 md:py-2 text-gray-500">Notifications</button>
           </div>
         </div>
 
