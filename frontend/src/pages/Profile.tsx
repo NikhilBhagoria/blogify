@@ -126,7 +126,7 @@ const Profile = () => {
       } else {
         throw new Error(response.data.error || 'Failed to delete account');
       }
-    } catch (error) {
+    } catch (error:any) {
       console.error('Error deleting account:', error);
       setDeleteError(error.response?.data?.error || 'Failed to delete account. Please try again later.');
     } finally {
