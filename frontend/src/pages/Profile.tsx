@@ -116,6 +116,31 @@ const Profile = () => {
       setIsLoading(false);
     }
   };
+
+  // In your AccountSettings component
+const deleteAccount = async () => {
+  try {
+    // setIsDeleting(true);
+    await axios.delete(`${BACKEND_URL}/api/v1/user/delete`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    });
+    
+    // Log the user out
+    // logout();
+    
+    // Redirect to home page
+    // navigate('/');
+    
+  } catch (error) {
+    console.error('Error deleting account:', error);
+    alert('Failed to delete account. Please try again later.');
+  } finally {
+    // setIsDeleting(false);
+    // setShowConfirmation(false);
+  }
+}; 
   return (
     <div className="bg-gray-100 min-h-screen">
       {/* Header */}
@@ -175,7 +200,7 @@ const Profile = () => {
           </div>
 
           <div>
-            <button className="text-sm font-medium text-red-500 mb-1 cursor-pointer">Delete account</button>
+            <button className="text-sm font-medium text-red-500 mb-1 cursor-pointer" onClick={deleteAccount}>Delete account</button>
             <p className="text-xs text-gray-500">Permanently delete your account and all of your content.</p>
           </div>
         </div>

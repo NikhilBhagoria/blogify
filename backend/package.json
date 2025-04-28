@@ -8,6 +8,7 @@
     "@nikhilbhagoria/medium-common": "^1.0.3",
     "@prisma/client": "^6.5.0",
     "@prisma/extension-accelerate": "^1.2.2",
+    "bcrypt": "^5.1.1",
     "hono": "^4.7.2"
   },
   "devDependencies": {

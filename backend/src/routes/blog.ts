@@ -2,7 +2,7 @@ import { createBlogInput, updateBlogInput } from '@nikhilbhagoria/medium-common'
 import { PrismaClient } from '@prisma/client/edge'
 import { withAccelerate } from "@prisma/extension-accelerate";
 import { Hono } from "hono";
-import { verify } from "hono/jwt";
+import { jwtMiddleware } from '../jwt-middleware/jwt-middleware';
 
 export const blogRouter = new Hono<{
   Bindings: {
@@ -14,27 +14,7 @@ export const blogRouter = new Hono<{
   }
 }>();
 
-blogRouter.use("/*", async (c, next) => {
-  try {
-    const authHeader = c.req.header("Authorization")
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return c.json({ message: "Missing or invalid Authorization header" }, 401);
-    }
-    const token = authHeader.replace("Bearer ", "");
-    if (!token) {
-      return c.json({ message: "Unauthorized" }, 401)
-    }
-    const decoded = await verify(token, c.env.JWT_SECRET);
-    if (!decoded) {
-      return c.json({ message: "Unauthorized" }, 401)
-    }
-    c.set("userId", decoded.id as string)
-    await next()
-  } catch (error) {
-    console.log("erro",error);
-    return c.json({ message: "Unauthorized" }, 401)
-  }
-})
+blogRouter.use("/*", jwtMiddleware);
 
 blogRouter.post("/", async (c) => {
   const prisma = new PrismaClient({
@@ -117,6 +97,7 @@ blogRouter.put("/:id", async (c) => {
 
 // get all blogs
 blogRouter.get('/bulk', async (c) => {
+  console.log("enter bulk")
   const prisma = new PrismaClient({
     datasourceUrl: c.env.DATABASE_URL,
   }).$extends(withAccelerate())
