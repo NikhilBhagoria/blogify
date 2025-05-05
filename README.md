@@ -3,9 +3,9 @@
 Welcome to Blogify, a full-stack blogging web application. This README provides a comprehensive guide to understanding and contributing to the project. 
 
 Check it out:
-Live Demo: [Blogify](https://blogify-plum-psi.vercel.app/).
-GitHub: https://github.com/NikhilBhagoria/blogify
-Demo Video: ["./Blog.mp4"]
+- Live Demo: [Blogify](https://blogify-plum-psi.vercel.app/).
+- GitHub: https://github.com/NikhilBhagoria/blogify
+- Demo Video: ["./Blog.mp4"]
 
 
 ## Table of Contents
