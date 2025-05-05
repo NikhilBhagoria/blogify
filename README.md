@@ -1,6 +1,12 @@
 # Blogify
 
-Welcome to Blogify, a full-stack blogging web application. This README provides a comprehensive guide to understanding and contributing to the project. The app is deployed and can be accessed at [Blogify](https://blogify-plum-psi.vercel.app/).
+Welcome to Blogify, a full-stack blogging web application. This README provides a comprehensive guide to understanding and contributing to the project. 
+
+Check it out:
+Live Demo: [Blogify](https://blogify-plum-psi.vercel.app/).
+GitHub: https://github.com/NikhilBhagoria/blogify
+Demo Video: ["./Blog.mp4"]
+
 
 ## Table of Contents
 
@@ -18,7 +24,7 @@ Blogify is a blogging platform that allows users to sign up, sign in, view publi
 ## 📝 Features
 
 - **User Authentication**: Secure signup and signin functionality using JWT.
-- **Blog Management**: Users can view all published blogs and publish their own blogs.
+- **Developed Blog Management Features** allowing users to view, publish, edit, and delete their own blogs.
 - **Responsive Design**: Fully responsive layout for an optimal viewing experience on all devices.
 - **Individual Blog Pages**: Each blog has its own dedicated page for detailed viewing.
 
@@ -36,6 +42,8 @@ Blogify is a blogging platform that allows users to sign up, sign in, view publi
 2. **Sign in**: Log in with your credentials.
 3. **View Blogs**: Browse all published blogs on the blogs page.
 4. **Publish Blog**: Create and publish your own blog.
+5. **Edit Blog**: Edit your own blog posts.
+6. **Profile**: Update your profile details or delete your account.
 
 ## ✨ Improvements
 
