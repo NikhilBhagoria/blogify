@@ -7,6 +7,7 @@ Check it out:
 - GitHub: https://github.com/NikhilBhagoria/blogify
 - Demo Video: [["https://github.com/NikhilBhagoria/blogify/blob/master/Blog.mp4"]](https://github.com/user-attachments/assets/5e8dec18-e975-49b1-a16f-b22ddc83d67d)
 
+https://github.com/user-attachments/assets/5e8dec18-e975-49b1-a16f-b22ddc83d67d
 
 
 ## Table of Contents
